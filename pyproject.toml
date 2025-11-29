@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yawe"
-version = "1.0.0"
+version = "1.1.0"
 description = "YAWE - Yet Another Workflow Engine: 一个轻量级、配置驱动的工作流任务编排框架"
 readme = "README.md"
 requires-python = ">=3.6"
