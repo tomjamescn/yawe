@@ -22,7 +22,7 @@ git clone https://github.com/tomjamescn/yawe.git
 cd yawe
 pip install -e .
 
-# 方式2: 从 PyPI 安装（待发布）
+# 方式2: 从 PyPI 安装
 pip install yawe
 
 # 方式3: 最小安装（仅依赖）
@@ -338,6 +338,87 @@ workflow:
 - Python 3.6+
 - rsync（用于文件传输，可选）
 - SSH 配置（~/.ssh/config）
+
+## 发布到 PyPI
+
+如果你 fork 了这个项目并想发布自己的版本，按照以下步骤操作：
+
+### 1. 准备工作
+
+```bash
+# 安装构建工具
+uv pip install build twine setuptools wheel
+
+# 更新版本号
+# 编辑 pyproject.toml 和 workflow_engine/__init__.py 中的版本号
+```
+
+### 2. 构建分发包
+
+```bash
+# 清理旧的构建文件
+rm -rf dist/ build/ *.egg-info/
+
+# 构建
+python -m build --no-isolation
+
+# 验证构建结果
+python -m twine check dist/*
+```
+
+### 3. 注册 PyPI 账号
+
+- 正式环境：https://pypi.org/account/register/
+- 测试环境：https://test.pypi.org/account/register/
+
+### 4. 配置 API Token
+
+1. 登录 PyPI，进入 Account Settings → API tokens
+2. 创建 API token 并保存
+3. 配置 `~/.pypirc`：
+
+```bash
+cat > ~/.pypirc << 'EOF'
+[pypi]
+  username = __token__
+  password = pypi-你的API-token
+
+[testpypi]
+  username = __token__
+  password = pypi-你的TestPyPI-token
+EOF
+
+chmod 600 ~/.pypirc
+```
+
+### 5. 先上传到 TestPyPI（推荐）
+
+```bash
+# 上传到测试环境
+python -m twine upload --repository testpypi dist/*
+
+# 测试安装
+pip install --index-url https://test.pypi.org/simple/ yawe
+```
+
+### 6. 上传到正式 PyPI
+
+```bash
+# 确认测试无误后上传
+python -m twine upload dist/*
+
+# 等待几分钟后测试安装
+pip install yawe
+```
+
+### 7. 验证发布
+
+```bash
+# 验证导入
+python -c "from workflow_engine import WorkflowEngine, Config, Logger; print('Success!')"
+```
+
+发布成功后，项目将出现在：https://pypi.org/project/yawe/
 
 ## License
 
