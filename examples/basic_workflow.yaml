@@ -1,0 +1,57 @@
+# 基础工作流示例
+
+# 日志配置
+logger:
+  log_dir: logs
+  level: INFO
+
+# 工作流定义
+workflow:
+  settings:
+    stop_on_first_error: true
+
+  tasks:
+    # 任务1: 本地命令示例
+    - name: local_hello
+      type: command
+      enabled: true
+      executor: local
+      command: |
+        echo "Hello from Workflow Engine!"
+        date
+        echo "Current directory: $(pwd)"
+
+    # 任务2: SSH远程命令示例 (需要在 ~/.ssh/config 中配置 my_server)
+    - name: remote_check
+      type: command
+      enabled: false  # 默认禁用，需要时设为 true
+      executor: ssh
+      host: my_server
+      command: |
+        echo "Running on remote server"
+        hostname
+        uptime
+
+    # 任务3: 带参数的命令模板
+    - name: template_demo
+      type: command
+      executor: local
+      command_template: |
+        echo "Processing {{ item_count }} items"
+        {% for i in range(item_count) %}
+        echo "  - Item {{ i + 1 }}"
+        {% endfor %}
+      params:
+        item_count: 5
+
+    # 任务4: 文件传输示例
+    - name: sync_example
+      type: transfer
+      enabled: false  # 默认禁用
+      host: my_server
+      direction: remote_to_local
+      params:
+        items:
+          - remote: /tmp/test_data
+            local: ./downloads/test_data
+            recursive: true
